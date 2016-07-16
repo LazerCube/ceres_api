@@ -1,0 +1,4 @@
+body{
+    background: url("/static/rest_framework/img/grid.png") repeat-x;
+    background-attachment: fixed;
+}
