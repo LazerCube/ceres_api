@@ -9,7 +9,7 @@ with open('/etc/secret_key.txt') as f:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'myproject',
+        'NAME': 'ceres',
         'USER': 'myprojectuser',
         'PASSWORD': 'randomtemppassword',
         'HOST': 'localhost',
