@@ -28,7 +28,7 @@ SYSTEMD_CONFIG = '/etc/systemd/system'
 DATABASE_USER = 'myprojectuser'
 DATABASE_PASSWORD = 'randomtemppassword'
 
-ORIGIN_DIR = "https://github.com/LazerCube/django_quickstart_fabric.git"
+ORIGIN_DIR = "https://github.com/LazerCube/ceres_api.git"
 
 def upgrade_system():
     sudo('apt-get update -y')
@@ -71,7 +71,7 @@ def remove_virtualenv():
     run('rmvirtualenv %s' %(PROJECT_NAME))
 
 def deploy_requirements():
-    with prefix('workon %s' %(PROJECT_NAME))):
+    with prefix('workon %s' %(PROJECT_NAME)):
         run('pip install -r {0}'.format(join(BASE_DIR,'requirements/production.txt')))
 
 def deploy_gunicorn(settings=None):
@@ -79,18 +79,19 @@ def deploy_gunicorn(settings=None):
     sudo('cp -f {0} {1}'.format(join(BASE_DIR, 'bin/gunicorn.service'), join(SYSTEMD_CONFIG, 'gunicorn.service')))
     if settings:
         append(join(HOME_DIR, '.bash_profile'), 'export DJANGO_SETTINGS_MODULE=\'config.settings.{0}\''.format(settings))
-    with prefix('workon %s' %(PROJECT_NAME))):
+    with prefix('workon %s' %(PROJECT_NAME)):
+        run('python {0} {1}'.format(join(BASE_DIR, 'project/manage.py'), 'makemigrations'))
         run('python {0} {1}'.format(join(BASE_DIR, 'project/manage.py'), 'migrate'))
         run('python {0} {1}'.format(join(BASE_DIR, 'project/manage.py'), 'collectstatic'))
         sudo('systemctl start gunicorn')
         sudo('systemctl enable gunicorn')
 
 def deploy_nginx():
-    sudo('rm -rf {0}'.format(join(NGINX_CONFIG, ('sites-available/%s' %(PROJECT_NAME))))))
+    sudo('rm -rf {0}'.format(join(NGINX_CONFIG, ('sites-available/%s' %(PROJECT_NAME)))))
     sudo('rm -rf {0}'.format(join(NGINX_CONFIG, 'sites-enabled/default')))
     sudo('cp -f {0} {1}'.format(join(BASE_DIR, 'config/nginx.conf'), join(NGINX_CONFIG, ('sites-available/%s' %(PROJECT_NAME)))))
     with settings(warn_only=True):
-        sudo('ln -s /etc/nginx/sites-available/%s /etc/nginx/sites-enabled', %(PROJECT_NAME))
+        sudo('ln -s /etc/nginx/sites-available/%s /etc/nginx/sites-enabled' %(PROJECT_NAME))
     sudo('nginx -t')
     sudo('systemctl restart nginx')
 
@@ -126,7 +127,7 @@ def restart():
     sudo("systemctl restart nginx")
 
 def manage(command=''):
-    with prefix('workon %s' %(PROJECT_NAME))):
+    with prefix('workon %s' %(PROJECT_NAME)):
         run('python {0} {1}'.format(join(BASE_DIR, 'project/manage.py'), command))
 
 def full_install(origin=ORIGIN_DIR, settings=None, secret_key=None, reboot=False):
