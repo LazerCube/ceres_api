@@ -9,7 +9,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ('url','id', 'email', 'username', 'created_at', 'updated_at',
+        fields = ('url','id', 'username', 'created_at', 'updated_at',
                   'first_name', 'last_name', 'password',
                   'confirm_password',)
         read_only_fields = ('created_at', 'updated_at',)

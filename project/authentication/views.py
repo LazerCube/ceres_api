@@ -1,10 +1,12 @@
-from rest_framework import permissions, viewsets
+from rest_framework import viewsets
+from rest_framework import status
+from rest_framework.response import Response
 
 from authentication.models import Account
 from authentication.serializers import AccountSerializer
+from authentication.permissions import IsAuthenticatedOrTokenHasReadWriteScope, IsOwnerOrReadOnly
 
-from authentication.permissions import IsAccountOwner
-
+from rest_framework.permissions import DjangoModelPermissions
 
 class AccountViewSet(viewsets.ModelViewSet):
     """
@@ -13,8 +15,12 @@ class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
 
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          IsAccountOwner)
+    permission_classes = [IsAuthenticatedOrTokenHasReadWriteScope, IsOwnerOrReadOnly]
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            self.permission_classes = ()
+        return super(AccountViewSet, self).get_permissions()
 
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
