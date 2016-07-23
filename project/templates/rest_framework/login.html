@@ -15,7 +15,7 @@
                     <div class="well">
                         <form action="{% url 'rest_framework:login' %}" role="form" method="post">
                             <fieldset>
-                                <legend class="text-capitalize">Lazer API Login</legend>
+                                <legend class="text-capitalize">Ceres API Login</legend>
 
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{{ next }}" />
