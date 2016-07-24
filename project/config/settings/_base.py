@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'oauth2_provider',
     'rest_framework',
     'authentication',
@@ -29,6 +30,8 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -97,6 +100,17 @@ OAUTH2_PROVIDER = {
 }
 
 LOGIN_URL = '/api-auth/login/'
+
+# this disables Cross domain requests
+CORS_ORIGIN_ALLOW_ALL = True
+
+# this allows cookie being passed cross domain
+CORS_ALLOW_CREDENTIALS = True
+
+# this is the list of allowed origins for cross domain ajax
+CORS_ORIGIN_WHITELIST = (
+        'http://192.168.2.48:4001',
+)
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
