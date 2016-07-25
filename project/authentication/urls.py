@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from authentication.views import AccountViewSet
+from authentication.views import AccountViewSet, CurrentUserView
 from django.conf.urls import url, include
 
 # Create a router and register our viewsets with it.
@@ -10,5 +10,6 @@ router.register(r'accounts', AccountViewSet)
 # Additionally, we include the login URLs for the browsable API.
 urlpatterns = [
     url(r'^', include(router.urls)),
+    url(r'^me/', CurrentUserView.as_view(), name="whoami"),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
