@@ -1,4 +1,4 @@
-# lazer api
+# Ceres api
 
 # Testing the API
 
