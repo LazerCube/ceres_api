@@ -5,24 +5,30 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
 class AccountManager(BaseUserManager):
-    def create_user(self, email, password=None, **kwargs):
-        if not email:
+    def create_user(self, **kwargs):
+        if not kwargs.get('email'):
             raise ValueError('Users must have a valid email address.')
+
+        if not kwargs.get('password'):
+            raise ValueError('Users must have a valid password.')
 
         if not kwargs.get('username'):
             raise ValueError('Users must have a valid username.')
 
         account = self.model(
-            email=self.normalize_email(email), username=kwargs.get('username')
+            email=self.normalize_email(kwargs.get('email', None)),
+            username=kwargs.get('username', None),
+            first_name=kwargs.get('first_name', None),
+            last_name=kwargs.get('last_name', None),
         )
 
-        account.set_password(password)
+        account.set_password(kwargs.get('password'))
         account.save()
 
         return account
 
-    def create_superuser(self, email, password, **kwargs):
-        account = self.create_user(email, password, **kwargs)
+    def create_superuser(self, **kwargs):
+        account = self.create_user(**kwargs)
 
         account.is_admin = True
         account.save()
