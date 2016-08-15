@@ -18,8 +18,8 @@ class AccountManager(BaseUserManager):
         account = self.model(
             email=self.normalize_email(kwargs.get('email', None)),
             username=kwargs.get('username', None),
-            first_name=kwargs.get('first_name', None),
-            last_name=kwargs.get('last_name', None),
+            first_name=kwargs.get('first_name', ''),
+            last_name=kwargs.get('last_name', ''),
         )
 
         account.set_password(kwargs.get('password'))
