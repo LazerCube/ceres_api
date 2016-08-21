@@ -1,7 +1,7 @@
 from posixpath import join
 
 from fabric.operations import local as lrun, run
-from fabric.api import cd, env, prefix, sudo, reboot, settings
+from fabric.api import cd, env, prefix, sudo, settings, reboot as restart_sys
 from fabric.contrib.files import append
 
 import os
@@ -16,7 +16,8 @@ def localhost():
 def remote():
     env.user = 'django'
     env.run = run
-    env.hosts = ['10.0.2.2:2500']
+    env.hosts = ['192.168.2.48:25000']
+    env.key_filename=['~/.ssh/id_rsa.pub']
 
 PROJECT_NAME = 'ceres'
 HOME_DIR = '/home/django'
@@ -24,6 +25,7 @@ BASE_DIR = join(HOME_DIR, 'ceres_api')
 
 NGINX_CONFIG = '/etc/nginx'
 SYSTEMD_CONFIG = '/etc/systemd/system'
+FAIL2_CONFIG = '/etc/fail2ban/'
 
 DATABASE_USER = 'myprojectuser'
 DATABASE_PASSWORD = 'randomtemppassword'
@@ -35,14 +37,14 @@ def upgrade_system():
     sudo('apt-get upgrade -y')
 
 def install_software():
-    sudo('apt-get install -y git nginx python-dev python-pip libpq-dev postgresql postgresql-contrib')
+    sudo('apt-get install -y git nginx python-dev python-pip libpq-dev postgresql postgresql-contrib fail2ban sendmail iptables-persistent')
     sudo('pip install -U virtualenvwrapper')
     append(join(HOME_DIR, '.bash_profile'), ('export WORKON_HOME={0}/.virtualenvs'.format(HOME_DIR), 'source /usr/local/bin/virtualenvwrapper.sh'))
 
 def remove_software():
     run('rm -rf {0}'.format(join(HOME_DIR, '.bash_profile')))
     sudo('pip uninstall virtualenvwrapper')
-    sudo('apt-get purge -y nginx python-dev python-pip libpq-dev postgresql postgresql-contrib')
+    sudo('apt-get purge -y git nginx python-dev python-pip libpq-dev postgresql postgresql-contrib fail2ban sendmail iptables-persistent')
     sudo('apt-get autoremove')
 
 def create_database():
@@ -95,6 +97,24 @@ def deploy_nginx():
     sudo('nginx -t')
     sudo('systemctl restart nginx')
 
+def deploy_fail2ban():
+    sudo('ufw disable')
+    sudo('rm -rf {0}'.format(join(FAIL2_CONFIG, 'jail.local')))
+    sudo('cp -f {0} {1}'.format(join(BASE_DIR, 'config/jail.conf'), join(FAIL2_CONFIG, 'jail.local')))
+
+def deploy_iptables():
+    sudo('systemctl stop fail2ban')
+    # Doesn't seem to work in ubuntu server 16.04
+    # sudo('iptables-persistent flush')
+    sudo('netfilter-persistent flush')
+    sudo('iptables -A INPUT -i lo -j ACCEPT')
+    sudo('iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT')
+    sudo('iptables -A INPUT -p tcp --dport 25000 -j ACCEPT')
+    sudo('iptables -A INPUT -p tcp -m multiport --dports 80,443 -j ACCEPT')
+    sudo('iptables -A INPUT -j DROP')
+    sudo('dpkg-reconfigure iptables-persistent')
+    sudo('systemctl start fail2ban')
+
 def generate_key(secret_key=None):
     if secret_key:
         return secret_key
@@ -110,21 +130,27 @@ def remove_key():
 
 def sys_reboot(reboot=False):
     if reboot:
-        print('::Rebooting to apply new changes...')
-        reboot(200)
-        print('::Continuing with fabric...')
+        with settings(warn_only=True):
+            print('::Rebooting to apply new changes...')
+            restart_sys(200)
+            print('::Continuing with fabric...')
+
 
 def start():
+    sudo("systemctl start fail2ban")
     sudo("systemctl start gunicorn")
     sudo("systemctl start nginx")
 
 def stop():
-    sudo("systemctl stop gunicorn")
     sudo("systemctl stop nginx")
+    sudo("systemctl stop gunicorn")
+    sudo("systemctl stop fail2ban")
 
 def restart():
     sudo("systemctl restart gunicorn")
     sudo("systemctl restart nginx")
+    sudo('systemctl stop fail2ban')
+    sudo("systemctl start fail2ban")
 
 def manage(command=''):
     with prefix('workon %s' %(PROJECT_NAME)):
@@ -139,14 +165,17 @@ def full_install(origin=ORIGIN_DIR, settings=None, secret_key=None, reboot=False
     create_key(secret_key)
     create_virtualenv()
     deploy_requirements()
+    deploy_fail2ban()
     deploy_gunicorn(settings)
     deploy_nginx()
+    deploy_iptables()
     start()
 
 def quick_upgrade(settings=None, secret_key=None):
     upgrade_myproject()
     create_key(secret_key)
     deploy_requirements()
+    deploy_fail2ban()
     deploy_gunicorn(settings)
     restart()
 
@@ -157,8 +186,10 @@ def full_upgrade(settings=None, secret_key=None, reboot=False):
     upgrade_myproject()
     create_key(secret_key)
     deploy_requirements()
+    deploy_fail2ban()
     deploy_gunicorn(settings)
     deploy_nginx()
+    deploy_iptables()
     restart()
 
 def full_remove(reboot=False):
