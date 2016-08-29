@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'rest_framework',
     'authentication',
+    'chat',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -88,8 +89,8 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.AdminRenderer',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 100
+    'DEFAULT_PAGINATION_CLASS': 'core.pagination.LinkHeaderPagination',
+    'PAGE_SIZE': 5,
 }
 
 AUTH_USER_MODEL = 'authentication.Account'

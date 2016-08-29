@@ -23,7 +23,16 @@ class AccountViewSet(viewsets.ModelViewSet):
             self.permission_classes = ()
         return super(AccountViewSet, self).get_permissions()
 
-    def create(self, request):
+    def update(self, request, *args, **kwargs):
+        instance = request.user
+
+        serializer = self.get_serializer(instance, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():

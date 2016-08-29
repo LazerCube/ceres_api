@@ -45,3 +45,74 @@ http -a tom:password123 POST http://127.0.0.1:8000/snippets/ code="print 123"
 If we're interacting with the API programmatically we need to explicitly provide the authentication credentials on each request.
 
 GET, POST, HEAD, OPTIONS
+
+Possible endpoints
+==================
+
+GET messages/sent
+
+### Auth
+
+    POST    auth/login
+    POST    auth/logout
+    POST    auth/token
+    POST    auth/
+
+### Accounts
+
+    GET     accounts/                       - all
+    GET     accounts/<id>/                  - Detail of id
+    GET     accounts/me/                    - returns information for current
+                                              auth user.
+
+    POST    accounts/                       - creates a new account                                 
+    PUT     accounts/<id>/                  - updates account information
+    DELETE  accounts/<id>/                  - deletes an account
+
+
+### conversations    
+
+    GET     conversations/                  - all
+    GET     conversations/<id>/             - Detail of id
+    GET     conversations/<id>/history/     - messages in that conversation id
+
+    POST    conversations/<id>/history/sync - syncs messages in the conversation with the client
+    POST    conversations/<id>/message/     - send a message to that conversation
+
+    POST    conversations/<id>/             - creates a new conversation
+    PUT     conversations/<id>/             - updates conversation information
+    DELETE  conversations/<id>/             - deletes a conversation
+
+### Messages
+
+    GET messages/                           - all comments you have access to
+    GET messages/<id>/                      - detail of id
+
+    POST    messages/<id>/
+    PUT     messages/<id>/
+    DELETE  messages/<id>/
+
+### Friends
+
+    GET     friends/                        - all auth user's friends
+    GET     friends/<id>/                   - detail of a friend
+
+### Friendships
+
+friendships include any information related to two users.
+This might include. blocking, muting, marked as spam, notification pref, can pm, etc
+
+    GET     friendships/
+    GET     friendships/incoming/
+    GET     friendship/outgoing/  
+
+    POST    friendships/<id>/
+    PUT     friendships/<id>/
+    DELETE  friendships/<id>/
+
+Todo
+====
+
+*   room? conversations?
+*   message? body?
+*   
