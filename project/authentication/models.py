@@ -4,6 +4,9 @@ from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
+from django_extensions.db.fields import AutoSlugField
+from core.mixins import UUIDIdMixin
+
 class AccountManager(BaseUserManager):
     def create_user(self, **kwargs):
         if not kwargs.get('email'):
@@ -35,12 +38,14 @@ class AccountManager(BaseUserManager):
 
         return account
 
-class Account(AbstractBaseUser, PermissionsMixin):
+class Account(AbstractBaseUser, PermissionsMixin, UUIDIdMixin):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=40, unique=True)
 
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
+
+    slug = AutoSlugField(('slug'), populate_from='username')
 
     is_admin = models.BooleanField(default=False)
 

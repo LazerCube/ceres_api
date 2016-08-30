@@ -4,8 +4,7 @@ from django.conf.urls import include, url, patterns
 from django.conf import settings
 from django.conf.urls.static import static
 
-from rest_framework.routers import DefaultRouter
-from core.routers import CustomRouter
+from rest_framework_nested import routers
 
 from oauth2_provider import views
 from django.conf import settings
@@ -17,12 +16,16 @@ from authentication.views import CurrentUserView
 # Chat views
 from chat.views import RoomViewSet
 from chat.views import MessageViewSet
+from chat.views import NestedMessageViewSet
 
 # creat router and register our viewsets with it.
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register(r'accounts', AccountViewSet)
 router.register(r'messages', MessageViewSet)
-router.register(r'conversations', RoomViewSet)
+router.register(r'room', RoomViewSet)
+
+room_router = routers.NestedSimpleRouter(router, r'room', lookup='room')
+room_router.register(r'messages', NestedMessageViewSet, base_name='room-messages')
 
 '''
 Include oauth2_provider urls one by one because "/applications" urls are not secure.
@@ -33,6 +36,7 @@ print(os.environ.get('DJANGO_SETTINGS_MODULE'))
 
 urlpatterns = [
     url(r'^', include(router.urls)),
+    url(r'^', include(room_router.urls)),
     url(r'^authorize/$', views.AuthorizationView.as_view(), name="authorize"),
     url(r'^token/$', views.TokenView.as_view(), name="token"),
     url(r'^revoke_token/$', views.RevokeTokenView.as_view(), name="revoke-token"),

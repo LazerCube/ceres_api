@@ -1,78 +1,58 @@
-from rest_framework import viewsets
-from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+
+from rest_framework.generics import get_object_or_404
+from rest_framework.mixins import (
+    RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, CreateModelMixin
+)
 
 from core.pagination import StandardResultsSetPagination
-
-from chat.models import Room, Message
-from chat.serializers import RoomSerializer, MessageSerializer
 
 from rest_framework.permissions import DjangoModelPermissions
 from authentication.permissions import IsAuthenticatedOrTokenHasReadWriteScope, IsOwnerOrReadOnly
 
+from chat.models import Room, Message
+from chat.serializers import RoomSerializer, MessageSerializer
 
-class RoomViewSet(viewsets.ModelViewSet):
-    """
-    Room view set
-    """
-
-    queryset = Room.objects.all()
+class RoomViewSet(ModelViewSet):
     serializer_class = RoomSerializer
+    queryset = Room.objects.all()
     permission_classes = [IsAuthenticatedOrTokenHasReadWriteScope, IsOwnerOrReadOnly]
 
-    @detail_route(methods=['get'], url_path='history')
-    def messages(self, request, pk=None):
-        room = self.get_object()
-        messages = Message.objects.filter(room=room)
-
-        self.serializer_class = MessageSerializer
-
-        page = self.paginate_queryset(messages)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(recent_users, many=True)
-        return Response(serializer.data)
-
     def perform_create(self, serializer):
-        serializer.save(auth_user=self.request.user)
+        serializer.save(user=self.request.user)
 
-    # @detail_route(methods=['post','get'], url_path='comment')
-    # def comment(self, request, pk=None, **kwargs):
-    #     room = self.get_object()
-    #
-    #     self.queryset = Message.objects.filter(room=room)
-    #     self.serializer_class = MessageSerializer
-    #
-    #     if request.method == 'POST':
-    #         data = {
-    #             'author': self.request.user,
-    #             'message': request.data['message'],
-    #             'room': room,
-    #         }
-    #
-    #         serializer = MessageSerializer(data=data)
-    #
-    #         if serializer.is_valid():
-    #             serializer.save()
-    #             return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #         else:
-    #             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    #     else:
-    #         serializer = MessageSerializer(instance=self.queryset, many=True, context={'request': request})
-    #         return Response(serializer.data)
-
-class MessageViewSet(viewsets.ModelViewSet):
-    """
-    Room view set
-    """
-
+class MessageViewSet(
+    RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet
+):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticatedOrTokenHasReadWriteScope, IsOwnerOrReadOnly]
 
+class NestedMessageViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticatedOrTokenHasReadWriteScope]
+
+    def get_room(self, request, room_pk=None):
+        room = get_object_or_404(Room.objects.all(), pk=room_pk)
+        self.check_object_permissions(self.request, room)
+        return room
+
+    def create(self, request, *args, **kwargs):
+        self.get_room(request, room_pk=kwargs['room_pk'])
+        return super(NestedMessageViewSet, self).create(request, *args, **kwargs)
+
     def perform_create(self, serializer):
-        serializer.save(auth_user=self.request.user)
+        serializer.save(
+            author=self.request.user,
+            id=self.kwargs['room_pk']
+        )
+
+    def get_queryset(self):
+        return Message.objects.filter(room=self.kwargs['room_pk'])
+
+    def list(self, request, *args, **kwargs):
+        self.get_room(request, room_pk=kwargs['room_pk'])
+        return super(NestedMessageViewSet, self).list(request, *args, **kwargs)
