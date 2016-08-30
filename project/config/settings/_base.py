@@ -101,7 +101,7 @@ OAUTH2_PROVIDER = {
     'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'}
 }
 
-LOGIN_URL = '/api-auth/login/'
+LOGIN_URL = '/auth/login/'
 
 # this disables Cross domain requests
 CORS_ORIGIN_ALLOW_ALL = True

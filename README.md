@@ -53,10 +53,10 @@ GET messages/sent
 
 ### Auth
 
-    POST    auth/login
-    POST    auth/logout
-    POST    auth/token
-    POST    auth/
+    POST    auth/                           - auth endpoint for clients
+    POST    auth/login/                     - auth login for web api
+    POST    auth/token/                     - returns a auth token for user
+    POST    auth/revoke_token/              - deletes a auth token for an auth user
 
 ### Accounts
 
@@ -64,29 +64,26 @@ GET messages/sent
     GET     accounts/<id>/                  - Detail of id
     GET     accounts/me/                    - returns information for current
                                               auth user.
-
     POST    accounts/                       - creates a new account                                 
     PUT     accounts/<id>/                  - updates account information
     DELETE  accounts/<id>/                  - deletes an account
 
+### Room    
 
-### conversations    
+    GET     room/                           - all
+    GET     room/<id>/                      - Detail of id
+    GET     room/<id>/messages/             - messages in that conversation id
 
-    GET     conversations/                  - all
-    GET     conversations/<id>/             - Detail of id
-    GET     conversations/<id>/history/     - messages in that conversation id
+    POST    room/<id>/messages/             - send a message to that conversation
 
-    POST    conversations/<id>/history/sync - syncs messages in the conversation with the client
-    POST    conversations/<id>/message/     - send a message to that conversation
-
-    POST    conversations/<id>/             - creates a new conversation
-    PUT     conversations/<id>/             - updates conversation information
-    DELETE  conversations/<id>/             - deletes a conversation
+    POST    room/<id>/                      - creates a new conversation
+    PUT     room/<id>/                      - updates conversation information
+    DELETE  room/<id>/                      - deletes a conversation
 
 ### Messages
 
-    GET messages/                           - all comments you have access to
-    GET messages/<id>/                      - detail of id
+    GET     messages/                       - all comments you have access to
+    GET     messages/<id>/                  - detail of id
 
     POST    messages/<id>/
     PUT     messages/<id>/
@@ -109,10 +106,3 @@ This might include. blocking, muting, marked as spam, notification pref, can pm,
     POST    friendships/<id>/
     PUT     friendships/<id>/
     DELETE  friendships/<id>/
-
-Todo
-====
-
-*   room? conversations?
-*   message? body?
-*   

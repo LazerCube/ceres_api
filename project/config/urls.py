@@ -37,11 +37,11 @@ print(os.environ.get('DJANGO_SETTINGS_MODULE'))
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^', include(room_router.urls)),
-    url(r'^authorize/$', views.AuthorizationView.as_view(), name="authorize"),
-    url(r'^token/$', views.TokenView.as_view(), name="token"),
-    url(r'^revoke_token/$', views.RevokeTokenView.as_view(), name="revoke-token"),
+    url(r'^auth/$', views.AuthorizationView.as_view(), name="authorize"),
+    url(r'^auth/token/$', views.TokenView.as_view(), name="token"),
+    url(r'^auth/revoke_token/$', views.RevokeTokenView.as_view(), name="revoke-token"),
     url(r'^me/', CurrentUserView.as_view(), name="whoami"),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    url(r'^auth/', include('rest_framework.urls', namespace='rest_framework'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Warning : the following lines are unsecure
