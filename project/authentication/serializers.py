@@ -7,12 +7,14 @@ class AccountSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
     confirm_password = serializers.CharField(write_only=True, required=False)
 
+    friends = serializers.HyperlinkedIdentityField(view_name='account-friends-list', lookup_url_kwarg='account_pk')
+
     class Meta:
         model = Account
-        fields = ('url','id', 'slug', 'email', 'username', 'created_at', 'updated_at',
+        fields = ('url', 'friends', 'id', 'slug', 'email', 'username',
                   'first_name', 'last_name', 'password',
-                  'confirm_password',)
-        read_only_fields = ('url','id','slug', 'created_at', 'updated_at')
+                  'confirm_password', 'created_at', 'updated_at')
+        read_only_fields = ('url','id','slug', 'friends', 'created_at', 'updated_at')
 
         def create(self, validated_data):
             return Account.objects.create(**validated_data)

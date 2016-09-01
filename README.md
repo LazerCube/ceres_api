@@ -68,6 +68,17 @@ GET messages/sent
     PUT     accounts/<id>/                  - updates account information
     DELETE  accounts/<id>/                  - deletes an account
 
+    GET     accounts/<id>/friends/          - return list of friends
+    GET     accounts/<id>/friends/incoming/ - return list of people that have you added as a friend
+    GET     accounts/<id>/friends/outgoing/ - return list of people that you have added as a friend
+
+    POST    accounts/<id>/friends/          - Create a new friend
+
+### Friends
+
+    GET     friends/                        - all user friends information(confirmed/pending)
+    GET     friends/<id>/                   - detail of a friend
+
 ### Room    
 
     GET     room/                           - all
@@ -89,20 +100,7 @@ GET messages/sent
     PUT     messages/<id>/
     DELETE  messages/<id>/
 
-### Friends
+### Relationship
 
-    GET     friends/                        - all auth user's friends
-    GET     friends/<id>/                   - detail of a friend
-
-### Friendships
-
-friendships include any information related to two users.
+Relationship include any information related to two users.
 This might include. blocking, muting, marked as spam, notification pref, can pm, etc
-
-    GET     friendships/
-    GET     friendships/incoming/
-    GET     friendship/outgoing/  
-
-    POST    friendships/<id>/
-    PUT     friendships/<id>/
-    DELETE  friendships/<id>/

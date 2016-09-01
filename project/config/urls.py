@@ -18,14 +18,24 @@ from chat.views import RoomViewSet
 from chat.views import MessageViewSet
 from chat.views import NestedMessageViewSet
 
+# Relationship views
+from relationships.views import RelationshipViewSet
+from relationships.views import NestedFriendViewSet
+from relationships.views import FriendViewSet
+
 # creat router and register our viewsets with it.
 router = routers.DefaultRouter()
 router.register(r'accounts', AccountViewSet)
 router.register(r'messages', MessageViewSet)
-router.register(r'room', RoomViewSet)
+router.register(r'relationships', RelationshipViewSet)
+router.register(r'friends', FriendViewSet)
+router.register(r'rooms', RoomViewSet)
 
-room_router = routers.NestedSimpleRouter(router, r'room', lookup='room')
+room_router = routers.NestedSimpleRouter(router, r'rooms', lookup='room')
 room_router.register(r'messages', NestedMessageViewSet, base_name='room-messages')
+
+account_router = routers.NestedSimpleRouter(router, r'accounts', lookup='account')
+account_router.register(r'friends', NestedFriendViewSet, base_name='account-friends')
 
 '''
 Include oauth2_provider urls one by one because "/applications" urls are not secure.
@@ -37,6 +47,7 @@ print(os.environ.get('DJANGO_SETTINGS_MODULE'))
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^', include(room_router.urls)),
+    url(r'^', include(account_router.urls)),
     url(r'^auth/$', views.AuthorizationView.as_view(), name="authorize"),
     url(r'^auth/token/$', views.TokenView.as_view(), name="token"),
     url(r'^auth/revoke_token/$', views.RevokeTokenView.as_view(), name="revoke-token"),
