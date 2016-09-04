@@ -16,10 +16,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'generic_relations',
     'corsheaders',
     'oauth2_provider',
     'rest_framework',
     'authentication',
+    'activity',
     'chat',
     'relationships',
 ]

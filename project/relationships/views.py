@@ -20,17 +20,39 @@ from relationships.models import Relationship, Friend
 from relationships.serializers import RelationshipSerializer
 from relationships.serializers import FriendSerializer
 
-class RelationshipViewSet(ModelViewSet):
+class RelationshipViewSet(
+    RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet
+):
     serializer_class = RelationshipSerializer
     queryset = Relationship.objects.all()
-    permission_classes = [IsAuthenticatedOrTokenHasReadWriteScope, IsSourceUserOrPost]
+    permission_classes = [IsAuthenticatedOrTokenHasReadWriteScope]
 
     def get_queryset(self):
         user = self.request.user
         return Relationship.objects.filter(source_user=user)
 
+class NestedRelationshipViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+    serializer_class = RelationshipSerializer
+    queryset = Relationship.objects.all()
+    permission_classes = [IsAuthenticatedOrTokenHasReadWriteScope]
+
+    def get_account(self, request, account_pk=None):
+        account = get_object_or_404(Account.objects.all(), pk=account_pk)
+        self.check_object_permissions(request, account)
+        return account
+
+    def get_queryset(self):
+        return Relationship.objects.filter(source_user=self.request.user, target_user=self.kwargs['account_pk'])
+
     def perform_create(self, serializer):
-        serializer.save(source_user=self.request.user)
+        serializer.save(
+            source_user=self.request.user,
+            target_user=self.get_account(self.request, account_pk=self.kwargs['account_pk'])
+        )
+
+    def list(self, request, *args, **kwargs):
+        self.get_account(request, account_pk=kwargs['account_pk'])
+        return super(NestedRelationshipViewSet, self).list(request, *args, **kwargs)
 
 class FriendViewSet(
     RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet

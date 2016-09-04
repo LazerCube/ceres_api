@@ -19,9 +19,14 @@ from chat.views import MessageViewSet
 from chat.views import NestedMessageViewSet
 
 # Relationship views
+from relationships.views import NestedRelationshipViewSet
 from relationships.views import RelationshipViewSet
 from relationships.views import NestedFriendViewSet
 from relationships.views import FriendViewSet
+
+# Activty views
+from activity.views import NestedActivityViewSet
+from activity.views import ActivityViewSet
 
 # creat router and register our viewsets with it.
 router = routers.DefaultRouter()
@@ -30,12 +35,15 @@ router.register(r'messages', MessageViewSet)
 router.register(r'relationships', RelationshipViewSet)
 router.register(r'friends', FriendViewSet)
 router.register(r'rooms', RoomViewSet)
+router.register(r'activity', ActivityViewSet)
 
 room_router = routers.NestedSimpleRouter(router, r'rooms', lookup='room')
 room_router.register(r'messages', NestedMessageViewSet, base_name='room-messages')
 
 account_router = routers.NestedSimpleRouter(router, r'accounts', lookup='account')
+account_router.register(r'relationships',  NestedRelationshipViewSet, base_name='account-relationships')
 account_router.register(r'friends', NestedFriendViewSet, base_name='account-friends')
+account_router.register(r'activity', NestedActivityViewSet, base_name='account-activity')
 
 '''
 Include oauth2_provider urls one by one because "/applications" urls are not secure.

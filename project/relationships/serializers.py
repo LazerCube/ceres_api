@@ -2,8 +2,7 @@ from rest_framework import serializers
 from relationships.models import Relationship, Friend
 
 class RelationshipSerializer(serializers.HyperlinkedModelSerializer):
-    #target_username = serializers.ReadOnlyField(source='target_user.username')
-
+    
     class Meta:
         model = Relationship
         fields = (
@@ -11,7 +10,7 @@ class RelationshipSerializer(serializers.HyperlinkedModelSerializer):
             'marked_as_spam', 'notifications_enabled',
             'created_at', 'updated_at'
         )
-        read_only_fields = ('url', 'created_at', 'updated_at')
+        read_only_fields = ('url', 'target_user', 'created_at', 'updated_at')
 
 class FriendSerializer(serializers.HyperlinkedModelSerializer):
 

@@ -7,8 +7,10 @@ from django_extensions.db.models import TitleSlugDescriptionModel
 from core.mixins import UUIDIdMixin
 from authentication.models import Account
 
-from django.contrib.contenttypes.models import ContentType, ContentTypeManager
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+
+from activity.signals import action
 
 class RoomManager(models.Manager):
     def create(self, object, title, desc):
@@ -43,6 +45,9 @@ class Room(UUIDIdMixin, TitleSlugDescriptionModel):
         '''Function for adding messages into the chat room'''
         m = Message(room=self, msg_type=msg_type, author=sender, message=message)
         m.save()
+
+        action.send(m.author, verb='said', action_object=m, target=m.room)
+
         return m
 
     def say(self, sender, message):
