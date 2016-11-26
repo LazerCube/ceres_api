@@ -19,7 +19,7 @@ class AccountSerializer(serializers.ModelSerializer):
         read_only_fields = ('url','id','slug', 'friends', 'created_at', 'updated_at')
 
         def create(self, validated_data):
-            return Account.objects.create(**validated_data)
+            return Account.objects.create_user(**validated_data)
 
         def update(self, instance, validated_data):
             instance.username = validated_data.get('username', instance.username)

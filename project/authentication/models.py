@@ -9,11 +9,14 @@ from core.mixins import UUIDIdMixin
 
 class AccountManager(BaseUserManager):
     def create_user(self, **kwargs):
+
+        print(kwargs)
+
         if not kwargs.get('email'):
             raise ValueError('Users must have a valid email address.')
 
-        if not kwargs.get('password'):
-            raise ValueError('Users must have a valid password.')
+        # if not kwargs.get('password'):
+        #     raise ValueError('Users must have a valid password.')
 
         if not kwargs.get('username'):
             raise ValueError('Users must have a valid username.')

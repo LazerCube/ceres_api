@@ -25,6 +25,9 @@ class FriendManager(models.Manager):
         except Friend.DoesNotExist:
             return False
 
+    def get_friends(self):
+        return Friend.objects.filter(source_user=self.request.user, confirmed=True)
+    
     def create_or_make_friends(self, **kwargs):
         source_user = kwargs.get('source_user')
         target_user = kwargs.get('target_user')
